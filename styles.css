@@ -27,7 +27,7 @@ body {
     color: var(--text-color);
 }
 
-.header .typing-form{
+.header , .typing-form{
     max-width: 1000px;
     margin: 0 auto;
 }
