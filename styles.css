@@ -27,7 +27,7 @@ body {
     color: var(--text-color);
 }
 
-.header , .typing-form{
+.header , .chat-list .message .typing-form{
     max-width: 1000px;
     margin: 0 auto;
 }
@@ -35,6 +35,7 @@ body {
 .header {
     margin-top: 7vh;
     padding: 1rem;
+    display: none;
 }
 
 .header :where(.title, .subtitle) {
@@ -99,6 +100,55 @@ body {
 
 .suggestion-list .suggestion:hover {
     background: var(--secondary-hover-color);
+}
+
+.chat-list{
+    padding: 2rem 1rem 12rem;
+    max-height: 100vh;
+    overflow-y: auto;
+}
+
+.chat-list .message.incoming{
+    margin-top: 1.5rem;
+}
+
+.chat-list .message .message-content{
+ display: flex;
+ gap: 1.5rem;
+ width: 100%;
+ align-items: center;
+}
+.chat-list .message .avatar {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+    align-self: flex-start;
+}
+
+.chat-list .message .text {
+    color: var(--text-color);
+}
+
+.chat-list .message .icon{
+    height: 35px;
+    width: 35px;
+    background: var(--secondary-color);
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    margin-left: 3.5rem;
+    visibility: hidden;
+}
+
+.chat-list .message:hover .icon{
+    visibility: visible;
+}
+.chat-list .message .icon:hover{
+    background: var(--secondary-color);
 }
 
 .typing-area{
