@@ -2,13 +2,20 @@ const typingForm = document.querySelector(".typing-form");
 const chatList = document.querySelector(".chat-list");
 
 let userMessage = null ;
+const API_URL = ` `
 
-const createMessageElement = (content , className)=>{
+const createMessageElement = (content , ...classes)=>{
     const div = document.createElement("div");
-    div.classList.add("message",className);
+    div.classList.add("message", ...classes);
     div.innerHTML = content ;
     return div ;
   
+}
+
+
+//API Fetch
+const generateAPIresponse = ()=>{
+
 }
 
 //Show a loading animation while waiting for API response
@@ -31,6 +38,7 @@ const showLoadingAnimation = ()=>{
 const incomingMessageDiv =  createMessageElement(html , "incoming" ,"loading");
 
 chatList.appendChild(incomingMessageDiv);
+generateAPIresponse();
 }
 
 const handleOutgoingChat = () =>{
