@@ -273,3 +273,19 @@ body {
     text-align: center;
     color: var(--placeholder-color);
 }
+
+
+@media screen and (max-width:500px) {
+
+    .title,.subtitle{
+       margin-left: 50px;
+    }
+    .suggestion-list{
+        flex-wrap: wrap;
+        display: flex;
+        justify-content: center;
+        & > .suggestion{
+            height: 180px;
+        }
+    }
+}
