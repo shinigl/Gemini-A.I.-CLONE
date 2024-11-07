@@ -35,6 +35,10 @@ body {
 .header {
     margin-top: 7vh;
     padding: 1rem;
+ 
+}
+
+.hide-header{
     display: none;
 }
 

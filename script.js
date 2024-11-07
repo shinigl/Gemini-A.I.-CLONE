@@ -1,6 +1,7 @@
 const typingForm = document.querySelector(".typing-form");
 const chatList = document.querySelector(".chat-list");
 const deleteChatButton = document.getElementById('delete-btn');
+let header = document.querySelector("header")
 
 let userMessage = null;
 
@@ -47,7 +48,7 @@ const generateAPIresponse = async (incomingMessageDiv) => {
     catch (error) {
         console.log(error);
     } finally{
-     
+         
           incomingMessageDiv.classList.remove("loading"); //Remove loading animation
 
     }
@@ -102,10 +103,20 @@ const handleOutgoingChat = () => {
     const outgoingMessageDiv = createMessageElement(html, "outgoing");
     outgoingMessageDiv.querySelector(".text").innerText = userMessage;
     chatList.appendChild(outgoingMessageDiv);
+    //Remove header when chat started
+    header.classList.add("hide-header")
 
     typingForm.reset(); //Clear input fields
     setTimeout(showLoadingAnimation, 500)
 }
+
+deleteChatButton.addEventListener("click",()=>{
+   
+    if(confirm("Are you sure you want to delete chat history?")){
+        chatList.innerHTML = ""; //Clear chat history
+    }
+
+})
 
 //Handling outgoing prompt 
 typingForm.addEventListener("submit", (e) => {
