@@ -126,6 +126,7 @@ body {
     align-self: flex-start;
 }
 
+/* Only show the loading bars when message element contains loading class */
 .chat-list .message.loading .avatar{
     animation: rotate 3s linear infinite;
 }
@@ -165,11 +166,14 @@ body {
 }
 
 .chat-list .loading-indicator{
-    display: flex;
+    display: none;
     width: 100%;
     gap: 0.8rem;
     flex-direction: column;
 }
+ .chat-list .message.loading .loading-indicator{
+    display: flex;
+} 
 
 .chat-list .loading-indicator .loading-bar{
     width: 100%;

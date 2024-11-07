@@ -17,31 +17,45 @@ const createMessageElement = (content, ...classes) => {
 
 
 //Fetch response from the API based on user message
-const generateAPIresponse = async () => {
+const generateAPIresponse = async (incomingMessageDiv) => {
+
+    const textElement = incomingMessageDiv.querySelector(".text") //Get the text element
+    console.log(textElement);
+
     // Send a POST request to the API with the user's message
     try {
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                contens: [{
+                contents: [{
                     role: "user",
                     parts: [{ text: userMessage }]
                 }]
             })
         });
         const data = await response.json();
+
+        //Get the API response text
+        const apiResponse = data?.candidates[0].content.parts[0].text; //Answer by AI 
+        console.log(apiResponse)
+        
+        textElement.innerText = apiResponse;
+        
     }
     catch (error) {
         console.log(error);
+    } finally{
+     
+          incomingMessageDiv.classList.remove("loading"); //Remove loading animation
+
     }
 
 }
 
 //Show a loading animation while waiting for API response
 const showLoadingAnimation = () => {
-    const html = ` <div class="message incoming loading">
-        <div class="message-content">
+    const html = `<div class="message-content">
             <img src="images/gemini.svg" alt="Gemini Image" class="avatar">
             <p class="text"></p>
 
@@ -51,15 +65,29 @@ const showLoadingAnimation = () => {
                 <div class="loading-bar"></div>
             </div>
         </div>
-        <span class="icon material-symbols-rounded"><img src="images/content-copy.svg" alt=""></span>
+        <span onclick="copyMessage(this)" class="icon material-symbols-rounded"><img src="images/content-copy.svg" alt=""></span>
        </div>` ;
 
 
     const incomingMessageDiv = createMessageElement(html, "incoming", "loading");
 
     chatList.appendChild(incomingMessageDiv);
-    generateAPIresponse();
+    generateAPIresponse(incomingMessageDiv);
 }
+
+//Copy message to clipboard
+
+const copyMessage = (copyIcon) => {
+    const messageText = copyIcon.closest(".message").querySelector(".text").innerText; // Corrected line
+    navigator.clipboard.writeText(messageText); // Copy the answer to clipboard
+    copyIcon.innerText = "Check"; // Show tick icon
+    copyIcon.style.color ="white"
+
+    setTimeout(() => {
+        copyIcon.innerHTML = `<img src="images/content-copy.svg" alt="">`; // Revert icon after 1 second
+    }, 1000);
+};
+
 
 const handleOutgoingChat = () => {
     userMessage = typingForm.querySelector("#typing-input").value.trim();
