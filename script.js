@@ -1,5 +1,6 @@
 const typingForm = document.querySelector(".typing-form");
 const chatList = document.querySelector(".chat-list");
+const deleteChatButton = document.getElementById('delete-btn');
 
 let userMessage = null;
 
