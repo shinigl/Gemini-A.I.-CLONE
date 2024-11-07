@@ -28,7 +28,8 @@
     background-color: #2c2f38; /* Same darker background as the track */
 }
 
-/* Optional: style for when the scrollbar is at the edges */
+
+
 ::-webkit-scrollbar-corner {
     background-color: #1a1d23; /* Darker color for the corner */
 }
