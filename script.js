@@ -36,7 +36,7 @@ const generateAPIresponse = async (incomingMessageDiv) => {
 
         // Get the API response text
         let apiResponse = data?.candidates[0].content.parts[0].text;
-        
+
 
         // Clean up the response text to remove Markdown formatting (like ***, **, or any other symbols)
         const cleanedResponse = apiResponse
@@ -46,10 +46,13 @@ const generateAPIresponse = async (incomingMessageDiv) => {
             .replace(/\_/g, '')            // Remove underscore markdown (optional)
             .replace(/\n/g, '<br>');       // Replace line breaks with <br> (optional, if you want to keep line breaks)
 
-       
+
 
         // Render the cleaned response as plain text
         textElement.innerHTML = cleanedResponse;
+
+        // Use typing effect to display the response gradually
+        typingEffect(textElement, cleanedResponse);
 
     } catch (error) {
         console.log(error);
@@ -79,7 +82,11 @@ const showLoadingAnimation = () => {
     const incomingMessageDiv = createMessageElement(html, "incoming", "loading");
     chatList.appendChild(incomingMessageDiv);
     generateAPIresponse(incomingMessageDiv);
-}
+
+
+
+};
+
 
 // Copy message to clipboard
 const copyMessage = (copyIcon) => {
@@ -125,13 +132,36 @@ deleteChatButton.addEventListener("click", () => {
 });
 
 //Suggestion-list working
-suggestion.forEach((ele)=>{
+suggestion.forEach((ele) => {
     console.log(ele);
-    ele.addEventListener("click",()=>{
+    ele.addEventListener("click", () => {
         typingForm.querySelector("#typing-input").value = ele.querySelector(".text").textContent;
         handleOutgoingChat();
     })
 })
+
+const typingEffect = (element, text, delay = 8) => {
+    let index = 0;
+    element.innerHTML = '';  // Clear any previous content
+
+    const typeCharacter = () => {
+        if (index < text.length) {
+            if (text.slice(index, index + 4) === '<br>') {
+                // If we encounter <br>, add a line break in the HTML content
+                element.innerHTML += '<br>';
+                index += 4; // Skip over the <br> tag in the text
+            } else {
+                // Otherwise, type out one character at a time
+                element.innerHTML += text[index++];
+            }
+            setTimeout(typeCharacter, delay); // Recursively type characters with a delay
+        }
+    };
+
+    // Start typing the content
+    typeCharacter();
+};
+
 
 // Handling outgoing prompt
 typingForm.addEventListener("submit", (e) => {
