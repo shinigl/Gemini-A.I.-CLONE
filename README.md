@@ -1,5 +1,8 @@
 # Chat Application with AI Integration
 
+![Chat Application Screenshot](images/ui.png)
+
+
 This project is a simple chat application that integrates with an AI-powered API to generate responses. It features a smooth, interactive chat interface with a loading animation while the AI response is being fetched. The app also allows users to copy AI-generated messages to the clipboard.
 
 ## Features
