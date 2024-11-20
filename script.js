@@ -7,8 +7,12 @@ let suggestion = document.querySelectorAll(".suggestion");
 let userMessage = null;
 
 // Pre-requisite of API requests
-const API_KEY = "AIzaSyCcXIoehlfCn6RrhB2BgcGMPRwS7IkmxU8 ";
+const API_KEY = "AIzaSyCcXIoehlfCn6RrhB2BgcGMPRwS7IkmxU8";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+// Retry parameters
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 2000; // 2 seconds
 
 const createMessageElement = (content, ...classes) => {
     const div = document.createElement("div");
@@ -17,10 +21,8 @@ const createMessageElement = (content, ...classes) => {
     return div;
 }
 
-// Fetching API response
-const generateAPIresponse = async (incomingMessageDiv) => {
-    const textElement = incomingMessageDiv.querySelector(".text"); // Get the text element
-
+// Retry function for fetching API response
+const fetchAPIResponse = async (attempt = 1) => {
     try {
         const response = await fetch(API_URL, {
             method: "POST",
@@ -32,35 +34,67 @@ const generateAPIresponse = async (incomingMessageDiv) => {
                 }]
             })
         });
+
+        if (!response.ok) {
+            throw new Error(`API request failed with status: ${response.status}`);
+        }
+
         const data = await response.json();
-
-        // Get the API response text
-        let apiResponse = data?.candidates[0].content.parts[0].text;
-
-
-        // Clean up the response text to remove Markdown formatting (like ***, **, or any other symbols)
-        const cleanedResponse = apiResponse
-            .replace(/^(\*\*\*|\s+)/g, '') // Remove leading ***
-            .replace(/(\*\*\*|\s+)$/g, '') // Remove trailing ***
-            .replace(/\*\*/g, '')          // Remove bold markdown (optional)
-            .replace(/\_/g, '')            // Remove underscore markdown (optional)
-            .replace(/\n/g, '<br>');       // Replace line breaks with <br> (optional, if you want to keep line breaks)
-
-
-
-        // Render the cleaned response as plain text
-        textElement.innerHTML = cleanedResponse;
-
-        // Use typing effect to display the response gradually
-        typingEffect(textElement, cleanedResponse);
+        return data;
 
     } catch (error) {
+        console.log(`Attempt ${attempt} failed:`, error);
+
+        // Retry mechanism if status 503 is received (Server overloaded)
+        if (error.message.includes('503') && attempt < MAX_RETRIES) {
+            console.log(`Retrying... (${attempt + 1}/${MAX_RETRIES})`);
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY)); // Wait before retrying
+            return await fetchAPIResponse(attempt + 1); // Retry the request
+        }
+
+        // If retries are exhausted or the error isn't 503, throw the error
+        throw error;
+    }
+};
+
+// Fetching API response
+const generateAPIresponse = async (incomingMessageDiv) => {
+    const textElement = incomingMessageDiv.querySelector(".text");
+
+    try {
+        // Try to fetch the data from the API with retries
+        const data = await fetchAPIResponse();
+
+        console.log('API Response:', data); // Log the entire response to check structure
+
+        // Ensure data and candidates are valid before accessing
+        if (data?.candidates && data.candidates.length > 0 && data.candidates[0]?.content?.parts?.[0]?.text) {
+            let apiResponse = data.candidates[0].content.parts[0].text;
+
+            // Clean up the response text to remove Markdown formatting
+            const cleanedResponse = apiResponse
+                .replace(/^(\*\*\*|\s+)/g, '') // Remove leading ***
+                .replace(/(\*\*\*|\s+)$/g, '') // Remove trailing ***
+                .replace(/\*\*/g, '')          // Remove bold markdown (optional)
+                .replace(/\_/g, '')            // Remove underscore markdown (optional)
+                .replace(/\n/g, '<br>');       // Replace line breaks with <br> (optional)
+
+            // Render the cleaned response as plain text
+            textElement.innerHTML = cleanedResponse;
+
+            // Use typing effect to display the response gradually
+            typingEffect(textElement, cleanedResponse);
+        } else {
+            console.error("No valid candidates found in the API response");
+            textElement.innerHTML = "Sorry, no response from API. Please try again later."; // Handle missing candidates
+        }
+    } catch (error) {
         console.log(error);
+        textElement.innerHTML = "Sorry, there was an issue with the API request. Please try again later."; // Gracefully handle errors
     } finally {
         incomingMessageDiv.classList.remove("loading"); // Remove loading animation
     }
-}
-
+};
 
 // Show a loading animation while waiting for API response
 const showLoadingAnimation = () => {
@@ -82,15 +116,11 @@ const showLoadingAnimation = () => {
     const incomingMessageDiv = createMessageElement(html, "incoming", "loading");
     chatList.appendChild(incomingMessageDiv);
     generateAPIresponse(incomingMessageDiv);
-
-
-
 };
-
 
 // Copy message to clipboard
 const copyMessage = (copyIcon) => {
-    const messageText = copyIcon.closest(".message").querySelector(".text").innerText; // Corrected line
+    const messageText = copyIcon.closest(".message").querySelector(".text").innerText;
     navigator.clipboard.writeText(messageText); // Copy the answer to clipboard
     copyIcon.innerText = "Check"; // Show tick icon
     copyIcon.style.color = "white";
@@ -131,14 +161,14 @@ deleteChatButton.addEventListener("click", () => {
     }
 });
 
-//Suggestion-list working
+// Suggestion-list working
 suggestion.forEach((ele) => {
     console.log(ele);
     ele.addEventListener("click", () => {
         typingForm.querySelector("#typing-input").value = ele.querySelector(".text").textContent;
         handleOutgoingChat();
     })
-})
+});
 
 const typingEffect = (element, text, delay = 8) => {
     let index = 0;
@@ -161,7 +191,6 @@ const typingEffect = (element, text, delay = 8) => {
     // Start typing the content
     typeCharacter();
 };
-
 
 // Handling outgoing prompt
 typingForm.addEventListener("submit", (e) => {
