@@ -6,7 +6,6 @@ let suggestion = document.querySelectorAll(".suggestion");
 
 let userMessage = null;
 
-// Pre-requisite of API requests
 const API_KEY = "AIzaSyCcXIoehlfCn6RrhB2BgcGMPRwS7IkmxU8";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
@@ -45,29 +44,19 @@ const fetchAPIResponse = async (attempt = 1) => {
     } catch (error) {
         console.log(`Attempt ${attempt} failed:`, error);
 
-        // Retry mechanism if status 503 is received (Server overloaded)
-        if (error.message.includes('503') && attempt < MAX_RETRIES) {
-            console.log(`Retrying... (${attempt + 1}/${MAX_RETRIES})`);
-            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY)); // Wait before retrying
-            return await fetchAPIResponse(attempt + 1); // Retry the request
-        }
-
-        // If retries are exhausted or the error isn't 503, throw the error
-        throw error;
-    }
-};
+    };
+}
 
 // Fetching API response
 const generateAPIresponse = async (incomingMessageDiv) => {
     const textElement = incomingMessageDiv.querySelector(".text");
 
     try {
-        // Try to fetch the data from the API with retries
         const data = await fetchAPIResponse();
 
-        console.log('API Response:', data); // Log the entire response to check structure
+        console.log('API Response:', data); 
 
-        // Ensure data and candidates are valid before accessing
+       
         if (data?.candidates && data.candidates.length > 0 && data.candidates[0]?.content?.parts?.[0]?.text) {
             let apiResponse = data.candidates[0].content.parts[0].text;
 
